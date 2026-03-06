@@ -8,9 +8,6 @@
   <meta property="og:title" content="Georgia Solar ROI Calculator" />
   <meta property="og:description" content="Georgia-specific solar savings calculator. Uses Georgia Power's real 2026 export rate — not the generic national numbers." />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://yourdomain.com/" />
-  <meta property="og:image" content="https://yourdomain.com/og-image.jpg" />
-  <link rel="stylesheet" href="css/style.css" />
 
   <script type="application/ld+json">
   {
@@ -32,352 +29,562 @@
       {
         "@type": "Question",
         "name": "Does Georgia have net metering?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Georgia Power does not offer traditional full-retail net metering. Instead, it offers the RNR Solar Buy Back program, which credits excess solar at approximately 7.2 cents per kWh — well below the retail rate of 8–14 cents per kWh. The program has a 5,000-customer cap statewide."
-        }
+        "acceptedAnswer": { "@type": "Answer", "text": "Georgia Power does not offer traditional full-retail net metering. Instead, it offers the RNR Solar Buy Back program at approximately 7.2 cents per kWh. The program is capped at 5,000 residential customers statewide." }
       },
       {
         "@type": "Question",
         "name": "What is the federal solar tax credit in 2026?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "The federal residential solar Investment Tax Credit (ITC) is 30% of total system cost in 2026 under Section 25D of the tax code. This is a dollar-for-dollar reduction in federal income taxes owed, not a deduction."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How long is the payback period for solar in Georgia?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Due to Georgia Power's below-retail Solar Buy Back rate, payback periods in Georgia typically run 9–13 years for an average home — longer than states with full net metering. After payback, most systems still have 12–16 years of profitable operation remaining."
-        }
+        "acceptedAnswer": { "@type": "Answer", "text": "The residential federal ITC is 30% of total installed system cost under Section 25D (2026). It is a dollar-for-dollar reduction in federal income taxes owed." }
       }
     ]
   }
   </script>
+
+<style>
+/* ===== RESET & VARIABLES ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --orange: #FF8C00;
+  --yellow: #FFD100;
+  --dark:   #1C1C2E;
+  --green:  #27AE60;
+  --red:    #E74C3C;
+  --accent: #E94560;
+  --bg:     #F4F6F9;
+  --white:  #FFFFFF;
+  --border: #DEE2E6;
+  --text:   #2C3E50;
+  --muted:  #6C757D;
+  --shadow: 0 4px 24px rgba(0,0,0,0.09);
+  --radius: 14px;
+}
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: var(--text); background: var(--bg); line-height: 1.6; }
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+.hidden { display: none !important; }
+
+/* ===== HEADER ===== */
+.site-header { background: var(--dark); padding: 14px 0; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(0,0,0,.35); }
+.header-inner { display: flex; justify-content: space-between; align-items: center; }
+.brand { color: var(--yellow); font-weight: 800; font-size: 1.1rem; letter-spacing: -.3px; }
+.btn-header { background: var(--yellow); color: var(--dark); padding: 8px 20px; border-radius: 7px; font-weight: 700; font-size: .85rem; transition: opacity .2s; white-space: nowrap; }
+.btn-header:hover { opacity: .85; }
+
+/* ===== HERO ===== */
+.hero { background: linear-gradient(140deg, #1C1C2E 0%, #2D1B00 55%, #1C1C2E 100%); color: #fff; padding: 60px 0 50px; text-align: center; }
+.hero-badge { display: inline-block; background: rgba(255,209,0,.14); border: 1px solid rgba(255,209,0,.35); color: var(--yellow); padding: 5px 16px; border-radius: 20px; font-size: .78rem; font-weight: 600; margin-bottom: 18px; letter-spacing: .4px; }
+.hero h1 { font-size: clamp(1.7rem, 4vw, 2.6rem); font-weight: 800; margin-bottom: 14px; line-height: 1.2; }
+.hero-sub { font-size: 1.05rem; color: rgba(255,255,255,.78); max-width: 640px; margin: 0 auto 34px; }
+.hero-sub em { color: var(--yellow); font-style: normal; }
+.hero-stats { display: flex; justify-content: center; gap: 44px; flex-wrap: wrap; }
+.hero-stat .val { display: block; font-size: 2.1rem; font-weight: 800; color: var(--yellow); line-height: 1; }
+.hero-stat .lbl { font-size: .76rem; color: rgba(255,255,255,.55); margin-top: 4px; }
+
+/* ===== CALC SECTION ===== */
+.calc-section { padding: 44px 0 64px; }
+.calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; }
+@media(max-width:820px){ .calc-grid { grid-template-columns: 1fr; } }
+
+/* ===== INPUTS ===== */
+.inputs-panel { background: var(--white); border-radius: var(--radius); padding: 30px; box-shadow: var(--shadow); }
+.inputs-panel h2 { font-size: 1.15rem; font-weight: 800; color: var(--dark); margin-bottom: 22px; padding-bottom: 12px; border-bottom: 3px solid var(--yellow); }
+.fg { margin-bottom: 18px; }
+.fg label { display: block; font-weight: 600; font-size: .88rem; margin-bottom: 5px; }
+.fg select, .fg input[type=number] { width: 100%; padding: 10px 14px; border: 2px solid var(--border); border-radius: 8px; font-size: .95rem; color: var(--text); background: var(--white); transition: border-color .2s; }
+.fg select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath fill='%236C757D' d='M6 8L0 0h12z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; cursor: pointer; }
+.fg select:focus, .fg input:focus { outline: none; border-color: var(--orange); }
+.hint { display: block; font-size: .76rem; color: var(--muted); margin-top: 4px; }
+.check-label { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: .9rem; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--bg); transition: border-color .2s; }
+.check-label:hover { border-color: var(--orange); }
+.check-label input[type=checkbox] { accent-color: var(--dark); width: 16px; height: 16px; flex-shrink: 0; }
+.calc-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, var(--orange), #D97A00); color: #fff; border: none; border-radius: 9px; font-size: 1rem; font-weight: 800; cursor: pointer; margin-top: 10px; transition: transform .15s, box-shadow .15s; letter-spacing: .2px; }
+.calc-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,140,0,.35); }
+
+/* ===== RESULTS ===== */
+.results-panel { background: var(--white); border-radius: var(--radius); padding: 30px; box-shadow: var(--shadow); min-height: 460px; }
+.placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 420px; text-align: center; color: var(--muted); gap: 16px; }
+.placeholder .icon { font-size: 3.2rem; }
+.placeholder-warn { background: #FFFBEA; border: 1.5px solid #F6D860; border-radius: 10px; padding: 16px; font-size: .84rem; text-align: left; color: var(--text); max-width: 380px; line-height: 1.55; }
+
+/* Summary cards */
+.summary-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+.sc { background: var(--bg); border: 1.5px solid var(--border); border-radius: 11px; padding: 16px 12px; text-align: center; }
+.sc.highlight { background: linear-gradient(135deg, var(--dark), #2D1B00); border-color: var(--orange); }
+.sc.highlight .sc-val { color: var(--yellow); }
+.sc.highlight .sc-lbl { color: rgba(255,255,255,.55); }
+.sc-icon { font-size: 1.5rem; margin-bottom: 6px; }
+.sc-val { font-size: 1.55rem; font-weight: 800; color: var(--dark); line-height: 1; }
+.sc-lbl { font-size: .72rem; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .5px; }
+
+/* Breakdown blocks */
+.block { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+.block:last-of-type { border-bottom: none; }
+.block h3 { font-size: .93rem; font-weight: 700; margin-bottom: 10px; color: var(--dark); }
+.brow { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: .875rem; border-bottom: 1px solid #f0f0f0; }
+.brow:last-child { border-bottom: none; }
+.brow.total { font-weight: 700; font-size: .95rem !important; padding-top: 10px; }
+.brow.itc span:first-child, .brow.itc span:last-child { color: var(--green); font-weight: 700; }
+.badge { display: inline-block; background: var(--green); color: #fff; font-size: .67rem; padding: 1px 6px; border-radius: 4px; margin-left: 5px; font-weight: 700; vertical-align: middle; }
+
+/* Warning box */
+.warn-box { display: flex; gap: 12px; background: #FFFBEA; border: 1.5px solid #F6D860; border-radius: 10px; padding: 14px; margin: 18px 0; align-items: flex-start; }
+.warn-box .wi { font-size: 1.3rem; flex-shrink: 0; }
+.warn-box strong { font-size: .88rem; display: block; margin-bottom: 4px; }
+.warn-box p { font-size: .82rem; color: var(--text); margin: 0; line-height: 1.55; }
+
+/* Projection bars */
+.proj-bars { display: flex; flex-direction: column; gap: 6px; }
+.proj-row { display: flex; align-items: center; gap: 8px; font-size: .78rem; }
+.proj-lbl { width: 44px; color: var(--muted); flex-shrink: 0; }
+.proj-wrap { flex: 1; height: 16px; background: #e9ecef; border-radius: 8px; overflow: hidden; }
+.proj-fill { height: 100%; border-radius: 8px; transition: width .7s ease; }
+.proj-fill.neg  { background: linear-gradient(90deg, var(--red), #C0392B); }
+.proj-fill.mid  { background: linear-gradient(90deg, var(--orange), var(--yellow)); }
+.proj-fill.good { background: linear-gradient(90deg, var(--green), #2ECC71); }
+.proj-val { width: 72px; text-align: right; font-weight: 600; flex-shrink: 0; }
+
+/* CTA */
+.cta-box { text-align: center; margin-top: 22px; }
+.cta-headline { font-size: .95rem; font-weight: 600; margin-bottom: 12px; }
+.btn-main { display: block; background: linear-gradient(135deg, var(--orange), #D97A00); color: #fff; padding: 15px 20px; border-radius: 9px; font-weight: 800; font-size: 1rem; transition: opacity .2s, transform .15s; margin-bottom: 8px; }
+.btn-main:hover { opacity: .9; transform: translateY(-1px); }
+.cta-disc { font-size: .78rem; color: var(--muted); }
+.rate-note { margin-top: 16px; padding-top: 12px; border-top: 1px dashed var(--border); font-size: .77rem; color: var(--muted); line-height: 1.5; }
+
+/* ===== EXPLAINER ===== */
+.explainer { background: var(--dark); color: #fff; padding: 60px 0; }
+.explainer h2 { font-size: clamp(1.3rem,3vw,1.9rem); font-weight: 800; text-align: center; margin-bottom: 36px; color: var(--yellow); }
+.ex-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px,1fr)); gap: 20px; }
+.ex-card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); border-radius: var(--radius); padding: 24px; }
+.ex-card .ei { font-size: 1.9rem; margin-bottom: 12px; }
+.ex-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; color: var(--yellow); }
+.ex-card p { font-size: .875rem; color: rgba(255,255,255,.72); line-height: 1.6; }
+
+/* ===== FAQ ===== */
+.faq { background: var(--white); padding: 60px 0; border-top: 1px solid var(--border); }
+.faq h2 { font-size: 1.6rem; font-weight: 800; text-align: center; margin-bottom: 32px; color: var(--dark); }
+.faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media(max-width:768px){ .faq-grid { grid-template-columns: 1fr; } }
+.faq-item { padding: 20px; border: 1.5px solid var(--border); border-radius: var(--radius); }
+.faq-item h3 { font-size: .95rem; font-weight: 700; margin-bottom: 8px; color: var(--dark); }
+.faq-item p { font-size: .875rem; color: var(--muted); line-height: 1.6; }
+
+/* ===== FOOTER ===== */
+.site-footer { background: var(--dark); color: rgba(255,255,255,.4); padding: 26px 0; text-align: center; font-size: .79rem; }
+.site-footer a { color: var(--yellow); }
+</style>
 </head>
 <body>
 
 <script>
-  // ── SWAP THIS ONE VARIABLE TO UPDATE ALL CTAs ──
-  var AFFILIATE_URL = "mailto:your@email.com?subject=Free%20Solar%20Quote%20Request%20-%20Georgia";
+  /* ── SWAP THIS ONE LINE TO UPDATE ALL CTAs ── */
+  var AFFILIATE_URL = "mailto:your@email.com?subject=Free%20Solar%20Quote%20-%20Georgia";
 </script>
 
+<!-- HEADER -->
 <header class="site-header">
   <div class="container">
     <div class="header-inner">
       <div class="brand">☀️ Georgia Solar ROI</div>
-      <a class="cta-btn-header" id="header-cta" href="#">Get a Free Solar Quote</a>
+      <a class="btn-header" id="header-cta" href="#">Get a Free Solar Quote</a>
     </div>
   </div>
 </header>
 
-<main>
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">🏆 Georgia-Specific Data — Not Generic National Estimates</div>
+    <h1>Georgia Solar ROI Calculator</h1>
+    <p class="hero-sub">See your real payback period, 25-year savings, and 2026 federal tax credit — using Georgia Power's <em>actual</em> Solar Buy Back export rate, not the inflated numbers on national tools.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><span class="val">7.2¢</span><span class="lbl">GA Power export rate (2026)</span></div>
+      <div class="hero-stat"><span class="val">30%</span><span class="lbl">Federal ITC credit (2026)</span></div>
+      <div class="hero-stat"><span class="val">25 yr</span><span class="lbl">Savings projection</span></div>
+    </div>
+  </div>
+</section>
 
-  <section class="hero">
-    <div class="container">
-      <div class="hero-badge">🏆 Georgia-Specific Data — Not Generic National Estimates</div>
-      <h1>Georgia Solar ROI Calculator</h1>
-      <p class="hero-sub">See your real payback period, 25-year savings, and 2026 federal tax credit — calculated using Georgia Power's <em>actual</em> Solar Buy Back export rate, not the inflated numbers on national tools.</p>
-      <div class="hero-stats">
-        <div class="hero-stat">
-          <span class="stat-val">7.2¢</span>
-          <span class="stat-label">GA Power export rate (2026)</span>
+<!-- CALCULATOR -->
+<section class="calc-section">
+  <div class="container">
+    <div class="calc-grid">
+
+      <!-- INPUTS -->
+      <div class="inputs-panel">
+        <h2>Your Solar Details</h2>
+
+        <div class="fg">
+          <label for="utility">Your Utility Provider</label>
+          <select id="utility">
+            <option value="georgia_power">Georgia Power (most of GA)</option>
+            <option value="sawnee_emc">Sawnee EMC (Forsyth, Dawson counties)</option>
+            <option value="other_emc">Other Georgia EMC</option>
+          </select>
+          <span class="hint" id="utility-hint">Solar Buy Back rate: ~7.2¢/kWh export (2026) · 5,000-customer cap</span>
         </div>
-        <div class="hero-stat">
-          <span class="stat-val">30%</span>
-          <span class="stat-label">Federal ITC credit (2026)</span>
+
+        <div class="fg">
+          <label for="monthly_bill">Current Monthly Electric Bill ($)</label>
+          <input type="number" id="monthly_bill" value="180" min="30" max="1000" />
+          <span class="hint">Average GA homeowner pays $130–$220/mo in summer</span>
         </div>
-        <div class="hero-stat">
-          <span class="stat-val">25 yr</span>
-          <span class="stat-label">Savings projection</span>
+
+        <div class="fg">
+          <label for="system_size">Estimated System Size (kW)</label>
+          <select id="system_size">
+            <option value="4">4 kW — Small home / partial offset</option>
+            <option value="6">6 kW — 1,500–2,000 sq ft home</option>
+            <option value="8" selected>8 kW — 2,000–2,500 sq ft home</option>
+            <option value="10">10 kW — Large home (GA Power max)</option>
+          </select>
+          <span class="hint">Georgia Power Solar Buy Back caps systems at 10 kW AC</span>
+        </div>
+
+        <div class="fg">
+          <label for="system_cost">Estimated System Cost ($)</label>
+          <input type="number" id="system_cost" value="24000" min="8000" max="60000" />
+          <span class="hint">GA average: ~$2.80–$3.20/watt installed (2026). 8 kW ≈ $22,400–$25,600</span>
+        </div>
+
+        <div class="fg">
+          <label for="roof_dir">Primary Roof Direction</label>
+          <select id="roof_dir">
+            <option value="south" selected>South-facing (optimal)</option>
+            <option value="southwest">Southwest-facing</option>
+            <option value="southeast">Southeast-facing</option>
+            <option value="east_west">East or West-facing</option>
+          </select>
+        </div>
+
+        <div class="fg">
+          <label for="shading">Roof Shading</label>
+          <select id="shading">
+            <option value="none" selected>Minimal / no shading</option>
+            <option value="light">Light shading (few trees)</option>
+            <option value="moderate">Moderate shading</option>
+          </select>
+        </div>
+
+        <div class="fg">
+          <label class="check-label">
+            <input type="checkbox" id="battery" />
+            Add Battery Storage (+$8,000–$12,000 avg)
+          </label>
+        </div>
+
+        <div class="fg">
+          <label class="check-label">
+            <input type="checkbox" id="itc_eligible" checked />
+            I expect to owe federal income taxes (ITC eligible)
+          </label>
+        </div>
+
+        <div class="fg">
+          <label for="elec_inflation">Annual Electricity Rate Increase</label>
+          <select id="elec_inflation">
+            <option value="0.02">2% — conservative</option>
+            <option value="0.03" selected>3% — Georgia 10-yr avg</option>
+            <option value="0.04">4% — moderate</option>
+            <option value="0.05">5% — aggressive</option>
+          </select>
+        </div>
+
+        <button class="calc-btn" onclick="calculateROI()">Calculate My Solar ROI →</button>
+      </div>
+
+      <!-- RESULTS -->
+      <div class="results-panel" id="results-panel">
+        <div class="placeholder" id="placeholder">
+          <div class="icon">☀️</div>
+          <p>Enter your details and click <strong>Calculate</strong> to see your Georgia solar ROI.</p>
+          <div class="placeholder-warn">
+            <strong>⚠️ Why Georgia is different:</strong> Georgia Power's Solar Buy Back rate (~7.2¢/kWh) is below the retail rate you pay (8–14¢/kWh). Most national calculators get this wrong and overstate your savings.
+          </div>
+        </div>
+
+        <div id="results" class="hidden">
+
+          <div class="summary-cards">
+            <div class="sc highlight">
+              <div class="sc-icon">📅</div>
+              <div class="sc-val" id="r-payback">—</div>
+              <div class="sc-lbl">Payback Period</div>
+            </div>
+            <div class="sc">
+              <div class="sc-icon">💰</div>
+              <div class="sc-val" id="r-25yr">—</div>
+              <div class="sc-lbl">25-Year Net Savings</div>
+            </div>
+            <div class="sc">
+              <div class="sc-icon">📋</div>
+              <div class="sc-val" id="r-itc">—</div>
+              <div class="sc-lbl">Federal Tax Credit</div>
+            </div>
+            <div class="sc">
+              <div class="sc-icon">⚡</div>
+              <div class="sc-val" id="r-offset">—</div>
+              <div class="sc-lbl">Bill Offset</div>
+            </div>
+          </div>
+
+          <div class="block">
+            <h3>Investment Breakdown</h3>
+            <div class="brow"><span>Gross System Cost</span><span id="br-gross">—</span></div>
+            <div class="brow itc"><span>Federal ITC (30%) <span class="badge">2026</span></span><span id="br-itc">—</span></div>
+            <div class="brow" id="br-battery-row" style="display:none"><span>Battery Storage Add-on</span><span id="br-battery">+$10,000</span></div>
+            <div class="brow total"><span>Net Out-of-Pocket Cost</span><span id="br-net">—</span></div>
+          </div>
+
+          <div class="block">
+            <h3>Annual Savings (Year 1)</h3>
+            <div class="brow"><span>Solar Production (kWh/yr)</span><span id="br-prod">—</span></div>
+            <div class="brow"><span>Self-Consumed Energy Savings</span><span id="br-self">—</span></div>
+            <div class="brow"><span>Grid Export Credit (@ 7.2¢/kWh)</span><span id="br-export">—</span></div>
+            <div class="brow total"><span>Total Year 1 Savings</span><span id="br-yr1">—</span></div>
+          </div>
+
+          <div class="warn-box">
+            <div class="wi">⚠️</div>
+            <div>
+              <strong>Georgia Power Solar Buy Back Note</strong>
+              <p>Georgia Power credits excess solar at <strong>~7.2¢/kWh</strong> — not full retail (8–14¢/kWh). This program has a <strong>5,000-customer statewide cap</strong>. Maximizing self-consumption during peak solar hours (10am–3pm) significantly improves your ROI.</p>
+            </div>
+          </div>
+
+          <div class="block">
+            <h3>25-Year Cumulative Savings</h3>
+            <div class="proj-bars" id="proj-bars"></div>
+          </div>
+
+          <div class="cta-box">
+            <p class="cta-headline">Ready to go solar? Get quotes from vetted Georgia installers.</p>
+            <a class="btn-main" id="main-cta" href="#">☀️ Get My Free Georgia Solar Quote</a>
+            <p class="cta-disc">Free quotes from licensed Georgia solar installers — no obligation</p>
+          </div>
+
+          <div class="rate-note">
+            📋 Georgia Power Solar Buy Back: ~7.2¢/kWh (2026). Federal ITC: 30% Section 25D (2026). Production estimates use NREL PVWatts Atlanta metro data (4.5–5.2 peak sun hrs/day). Results are estimates — consult a licensed installer for a site assessment.
+          </div>
         </div>
       </div>
+
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="calculator-section">
-    <div class="container">
-      <div class="calculator-grid">
-
-        <!-- INPUTS -->
-        <div class="inputs-panel">
-          <h2>Your Solar Details</h2>
-
-          <div class="form-group">
-            <label for="utility">Your Utility Provider</label>
-            <select id="utility">
-              <option value="georgia_power">Georgia Power (most of GA)</option>
-              <option value="sawnee_emc">Sawnee EMC (Forsyth, Dawson counties)</option>
-              <option value="other_emc">Other Georgia EMC</option>
-            </select>
-            <span class="field-hint" id="utility-hint">Solar Buy Back rate: ~7.2¢/kWh export (2026)</span>
-          </div>
-
-          <div class="form-group">
-            <label for="monthly_bill">Current Monthly Electric Bill ($)</label>
-            <input type="number" id="monthly_bill" value="180" min="30" max="1000" placeholder="e.g. 180" />
-            <span class="field-hint">Average GA homeowner pays $130–$220/mo in summer</span>
-          </div>
-
-          <div class="form-group">
-            <label for="system_size">Estimated System Size (kW)</label>
-            <select id="system_size">
-              <option value="4">4 kW — Small home / partial offset</option>
-              <option value="6">6 kW — 1,500–2,000 sq ft home</option>
-              <option value="8" selected>8 kW — 2,000–2,500 sq ft home</option>
-              <option value="10">10 kW — Large home (GA Power max)</option>
-            </select>
-            <span class="field-hint">Georgia Power Solar Buy Back caps systems at 10 kW AC</span>
-          </div>
-
-          <div class="form-group">
-            <label for="system_cost">Estimated System Cost ($)</label>
-            <input type="number" id="system_cost" value="24000" min="8000" max="60000" placeholder="e.g. 24000" />
-            <span class="field-hint">GA average: ~$2.80–$3.20/watt installed (2026). 8 kW ≈ $22,400–$25,600</span>
-          </div>
-
-          <div class="form-group">
-            <label for="roof_direction">Primary Roof Direction</label>
-            <select id="roof_direction">
-              <option value="south" selected>South-facing (optimal)</option>
-              <option value="southwest">Southwest-facing</option>
-              <option value="southeast">Southeast-facing</option>
-              <option value="east_west">East or West-facing</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="shading">Roof Shading</label>
-            <select id="shading">
-              <option value="none" selected>Minimal / no shading</option>
-              <option value="light">Light shading (few trees)</option>
-              <option value="moderate">Moderate shading</option>
-            </select>
-          </div>
-
-          <div class="form-group toggle-group">
-            <label>Include Battery Storage?</label>
-            <div class="toggle-row">
-              <label class="toggle-label">
-                <input type="checkbox" id="battery" />
-                <span class="toggle-text">Add battery (+$8,000–$12,000 avg)</span>
-              </label>
-            </div>
-          </div>
-
-          <div class="form-group toggle-group">
-            <label>Tax Credit Eligibility</label>
-            <div class="toggle-row">
-              <label class="toggle-label">
-                <input type="checkbox" id="itc_eligible" checked />
-                <span class="toggle-text">I expect to owe federal income taxes (ITC eligible)</span>
-              </label>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="electricity_inflation">Annual Electricity Rate Increase (%)</label>
-            <select id="electricity_inflation">
-              <option value="0.02">2% (conservative)</option>
-              <option value="0.03" selected>3% (Georgia 10-yr historical avg)</option>
-              <option value="0.04">4% (moderate)</option>
-              <option value="0.05">5% (aggressive)</option>
-            </select>
-          </div>
-
-          <button class="calculate-btn" onclick="calculateROI()">Calculate My Solar ROI →</button>
-        </div>
-
-        <!-- RESULTS -->
-        <div class="results-panel" id="results-panel">
-          <div class="results-placeholder" id="results-placeholder">
-            <div class="placeholder-icon">☀️</div>
-            <p>Enter your details and click <strong>Calculate</strong> to see your Georgia solar ROI.</p>
-            <div class="placeholder-note">
-              <strong>⚠️ Why Georgia is different:</strong> Georgia Power's Solar Buy Back rate (7.2¢/kWh) is below the retail rate you pay (~8–14¢/kWh). This makes payback periods longer than states with true net metering — and most national calculators get this wrong.
-            </div>
-          </div>
-
-          <div class="results-content hidden" id="results-content">
-
-            <!-- Summary Cards Row -->
-            <div class="summary-cards">
-              <div class="summary-card highlight">
-                <div class="sc-icon">📅</div>
-                <div class="sc-val" id="res-payback">—</div>
-                <div class="sc-label">Payback Period</div>
-              </div>
-              <div class="summary-card">
-                <div class="sc-icon">💰</div>
-                <div class="sc-val" id="res-25yr">—</div>
-                <div class="sc-label">25-Year Net Savings</div>
-              </div>
-              <div class="summary-card">
-                <div class="sc-icon">📋</div>
-                <div class="sc-val" id="res-itc">—</div>
-                <div class="sc-label">Federal Tax Credit</div>
-              </div>
-              <div class="summary-card">
-                <div class="sc-icon">⚡</div>
-                <div class="sc-val" id="res-offset">—</div>
-                <div class="sc-label">Bill Offset</div>
-              </div>
-            </div>
-
-            <!-- Cost Breakdown -->
-            <div class="breakdown-block">
-              <h3>Investment Breakdown</h3>
-              <div class="breakdown-row"><span>Gross System Cost</span><span id="br-gross">—</span></div>
-              <div class="breakdown-row itc-row"><span>Federal ITC (30%) <span class="badge">2026</span></span><span id="br-itc">—</span></div>
-              <div class="breakdown-row" id="br-battery-row"><span>Battery Storage Add-on</span><span id="br-battery">—</span></div>
-              <div class="breakdown-row total-row"><span>Net Out-of-Pocket Cost</span><span id="br-net">—</span></div>
-            </div>
-
-            <!-- Annual Savings Breakdown -->
-            <div class="breakdown-block">
-              <h3>Annual Savings (Year 1)</h3>
-              <div class="breakdown-row"><span>Solar Production (kWh/yr)</span><span id="br-production">—</span></div>
-              <div class="breakdown-row"><span>Self-Consumed Energy Savings</span><span id="br-self-consume">—</span></div>
-              <div class="breakdown-row"><span>Grid Export Credit (@ 7.2¢/kWh)</span><span id="br-export">—</span></div>
-              <div class="breakdown-row total-row"><span>Total Year 1 Savings</span><span id="br-yr1-savings">—</span></div>
-            </div>
-
-            <!-- Georgia Warning Box -->
-            <div class="ga-warning" id="ga-warning-box">
-              <div class="gw-icon">⚠️</div>
-              <div class="gw-text">
-                <strong>Georgia Power Solar Buy Back Note</strong>
-                <p>Georgia Power's program credits excess solar at <strong>~7.2¢/kWh</strong> — not full retail (~8–14¢/kWh). <span id="gw-slots-note">This program has a <strong>5,000-customer statewide cap</strong> and enrollment is first-come, first-served.</span> Maximizing self-consumption (running appliances during daylight) significantly improves your ROI.</p>
-              </div>
-            </div>
-
-            <!-- 25-Year Projection Chart (text-based) -->
-            <div class="breakdown-block">
-              <h3>25-Year Cumulative Savings</h3>
-              <div class="projection-bars" id="projection-bars"></div>
-            </div>
-
-            <!-- CTA -->
-            <div class="cta-section">
-              <p class="cta-headline">Ready to go solar? Get quotes from vetted Georgia installers.</p>
-              <a class="cta-btn-main" id="main-cta" href="#">☀️ Get My Free Georgia Solar Quote</a>
-              <p class="cta-disclaimer">Free quotes from licensed Georgia solar installers — no obligation</p>
-            </div>
-
-            <div class="rate-note">
-              <small>📋 Georgia Power Solar Buy Back export rate: ~7.2¢/kWh (2026). Federal ITC: 30% under Section 25D (2026). Production estimates use NREL PVWatts data for Atlanta metro (4.5–5.2 peak sun hours/day). Results are estimates — consult a licensed installer for a site-specific assessment.</small>
-            </div>
-          </div>
-        </div>
-
+<!-- WHY GEORGIA IS DIFFERENT -->
+<section class="explainer">
+  <div class="container">
+    <h2>Why Georgia Solar Math Is Different</h2>
+    <div class="ex-grid">
+      <div class="ex-card">
+        <div class="ei">🔄</div>
+        <h3>No True Net Metering</h3>
+        <p>Georgia Power uses the <strong>RNR Solar Buy Back program</strong>, crediting excess solar at ~7.2¢/kWh — far below retail. States like NC credit at full retail (~12¢/kWh), making their payback 2–4 years shorter.</p>
+      </div>
+      <div class="ex-card">
+        <div class="ei">📊</div>
+        <h3>Self-Consumption Is King</h3>
+        <p>Because the export rate is low, running appliances during peak solar hours (10am–3pm) dramatically improves ROI. Every kWh you use directly saves you the full retail rate instead of the 7.2¢ export credit.</p>
+      </div>
+      <div class="ex-card">
+        <div class="ei">🎫</div>
+        <h3>The 5,000-Spot Cap</h3>
+        <p>Georgia Power's Solar Buy Back is capped at <strong>5,000 participants statewide</strong> in a state of 11 million people. If the cap fills, new solar customers can't sell back to the grid at any rate.</p>
+      </div>
+      <div class="ex-card">
+        <div class="ei">💵</div>
+        <h3>Federal ITC Still Stacks</h3>
+        <p>The 30% federal ITC (2026, Section 25D) applies regardless of your utility's export rate. On a $24,000 system, that's <strong>$7,200 off your taxes</strong> — a dollar-for-dollar credit that significantly shortens payback.</p>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- WHY GEORGIA IS DIFFERENT -->
-  <section class="explainer-section">
-    <div class="container">
-      <h2>Why Georgia Solar Math Is Different From Other States</h2>
-      <div class="explainer-grid">
-        <div class="explainer-card">
-          <div class="ex-icon">🔄</div>
-          <h3>No True Net Metering</h3>
-          <p>Georgia Power uses the <strong>RNR Solar Buy Back program</strong>, crediting excess solar at ~7.2¢/kWh — far below what you pay for electricity. States like North Carolina credit at full retail (~12¢/kWh), making their payback periods 2–4 years shorter.</p>
-        </div>
-        <div class="explainer-card">
-          <div class="ex-icon">📊</div>
-          <h3>Self-Consumption Is King</h3>
-          <p>Because the export rate is low, maximizing self-consumption is critical in Georgia. Running your dishwasher, laundry, and EV charger during peak solar hours (10am–3pm) dramatically improves ROI versus exporting excess to the grid.</p>
-        </div>
-        <div class="explainer-card">
-          <div class="ex-icon">🎫</div>
-          <h3>The 5,000-Spot Cap</h3>
-          <p>Georgia Power's Solar Buy Back program is capped at <strong>5,000 participants statewide</strong> — in a state of 11 million people. If the cap fills, new solar customers can't sell back to the grid at any rate. Enrolling sooner protects your ROI.</p>
-        </div>
-        <div class="explainer-card">
-          <div class="ex-icon">💵</div>
-          <h3>Federal ITC Still Stacks</h3>
-          <p>The 30% federal ITC (2026, Section 25D) applies regardless of your utility's export rate. On a $24,000 system, that's <strong>$7,200 off your taxes</strong>. This is a dollar-for-dollar credit — not a deduction — and significantly shortens payback.</p>
-        </div>
+<!-- FAQ -->
+<section class="faq">
+  <div class="container">
+    <h2>Georgia Solar FAQ</h2>
+    <div class="faq-grid">
+      <div class="faq-item">
+        <h3>Does Georgia have net metering?</h3>
+        <p>Not in the traditional sense. Georgia Power offers the RNR Solar Buy Back program at approximately 7.2¢/kWh for 2026 — below the retail rate of 8–14¢/kWh. The program is also capped at 5,000 residential customers statewide.</p>
+      </div>
+      <div class="faq-item">
+        <h3>What is the federal solar tax credit in 2026?</h3>
+        <p>The residential federal ITC is 30% of total installed system cost under Section 25D. It's a dollar-for-dollar reduction in federal income taxes owed — not just a deduction. A $24,000 system generates a $7,200 tax credit.</p>
+      </div>
+      <div class="faq-item">
+        <h3>What's the typical payback period in Georgia?</h3>
+        <p>Due to the below-retail Solar Buy Back rate, Georgia payback periods typically run 9–13 years for a well-positioned system after the ITC. Most Georgia systems still have 12+ profitable years remaining after payback.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Is Sawnee EMC better for solar than Georgia Power?</h3>
+        <p>Sawnee EMC (Forsyth, Dawson counties) has its own interconnection and buyback policies that may differ from Georgia Power. Some EMCs offer slightly more favorable export rates. Contact your specific EMC for their current solar buyback terms.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Does adding a battery improve ROI in Georgia?</h3>
+        <p>Yes — primarily through bill savings and backup power value. A battery lets you store midday solar for evening use at retail savings rates instead of exporting at 7.2¢/kWh. In Georgia's low-export-rate environment, batteries make more financial sense than in net-metered states.</p>
+      </div>
+      <div class="faq-item">
+        <h3>What's the maximum system size on Georgia Power?</h3>
+        <p>Georgia Power's Solar Buy Back program caps residential systems at 10 kW AC. Systems larger than 10 kW can still be installed but won't qualify for the export credit program — all excess generation beyond your home's consumption would be wasted.</p>
       </div>
     </div>
-  </section>
-
-  <!-- FAQ -->
-  <section class="faq-section">
-    <div class="container">
-      <h2>Georgia Solar FAQ</h2>
-      <div class="faq-grid">
-        <div class="faq-item">
-          <h3>Does Georgia have net metering?</h3>
-          <p>Not in the traditional sense. Georgia Power offers the RNR Solar Buy Back program, which credits excess solar at approximately 7.2¢/kWh for 2026. This is below the retail rate you pay (8–14¢/kWh depending on your tier). The program is also capped at 5,000 residential customers statewide.</p>
-        </div>
-        <div class="faq-item">
-          <h3>What is the federal solar tax credit in 2026?</h3>
-          <p>The residential federal Investment Tax Credit (ITC) is 30% of total installed system cost under Section 25D. It's a dollar-for-dollar reduction in what you owe in federal income taxes — not just a deduction. The average Georgia system at $24,000 generates a $7,200 tax credit.</p>
-        </div>
-        <div class="faq-item">
-          <h3>What's the typical payback period in Georgia?</h3>
-          <p>Due to the below-retail Solar Buy Back rate, Georgia payback periods typically run 9–13 years for a well-positioned system after the ITC. This is longer than states with full net metering, but most Georgia systems still have 12+ years of net-positive operation remaining after payback.</p>
-        </div>
-        <div class="faq-item">
-          <h3>Is Sawnee EMC better than Georgia Power for solar?</h3>
-          <p>Sawnee EMC (serving Forsyth, Dawson, and surrounding counties) has its own interconnection and buyback policies that may differ from Georgia Power. Some EMCs offer slightly more favorable export rates. This calculator uses Georgia Power's published 2026 rates — contact your specific EMC for their current solar buyback terms.</p>
-        </div>
-        <div class="faq-item">
-          <h3>Does adding a battery improve ROI in Georgia?</h3>
-          <p>Yes, but primarily through bill savings and backup power value — not through better export rates. A battery lets you store midday solar for evening use, avoiding pulling from the grid at retail rates. In Georgia, where export credits are low, batteries make more financial sense than in net-metered states.</p>
-        </div>
-        <div class="faq-item">
-          <h3>What's the maximum system size allowed on Georgia Power?</h3>
-          <p>Georgia Power's Solar Buy Back program caps residential systems at 10 kW AC. Systems larger than 10 kW can still be installed but won't qualify for the export credit program — all excess generation would be wasted. This effectively limits most Georgia residential installs to 10 kW or under.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-</main>
+  </div>
+</section>
 
 <footer class="site-footer">
   <div class="container">
-    <p>© 2026 Georgia Solar ROI Calculator · Not affiliated with Georgia Power or Southern Company · Rate data: <a href="https://www.georgiapower.com/residential/rate-plans/residential-service.html" target="_blank" rel="noopener">Georgia Power 2026</a> · Federal ITC: <a href="https://www.seia.org/solar-investment-tax-credit/" target="_blank" rel="noopener">SEIA.org</a></p>
+    <p>© 2026 Georgia Solar ROI Calculator &nbsp;·&nbsp; Not affiliated with Georgia Power or Southern Company &nbsp;·&nbsp; Rate data: <a href="https://www.georgiapower.com/residential/rate-plans/residential-service.html" target="_blank" rel="noopener">Georgia Power 2026</a> &nbsp;·&nbsp; Federal ITC: <a href="https://www.seia.org/solar-investment-tax-credit/" target="_blank" rel="noopener">SEIA.org</a></p>
   </div>
 </footer>
 
-<script src="js/calculator.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('header-cta').href = AFFILIATE_URL;
-    document.getElementById('main-cta').href = AFFILIATE_URL;
+// =============================================================
+// Georgia Solar ROI Calculator — Inlined JS
+// Georgia Power Solar Buy Back: ~7.2¢/kWh (2026)
+// Federal ITC: 30% Section 25D (2026)
+// NREL PVWatts: Atlanta metro avg peak sun hrs
+// =============================================================
 
-    // Update utility hint on change
-    document.getElementById('utility').addEventListener('change', function() {
-      var hints = {
-        georgia_power: 'Solar Buy Back rate: ~7.2¢/kWh export (2026) · 5,000-customer cap',
-        sawnee_emc:    'Sawnee EMC rates vary — contact them directly for current solar buyback terms',
-        other_emc:     'EMC rates vary — check your EMC\'s interconnection agreement'
-      };
-      document.getElementById('utility-hint').textContent = hints[this.value];
-    });
+var GA_EXPORT_RATE    = 0.072;
+var FEDERAL_ITC       = 0.30;
+var SYSTEM_EFF        = 0.80;
+var SELF_CONSUME      = 0.60;
+var RETAIL_RATE       = 0.115;
+var BATTERY_COST      = 10000;
+var DEGRADATION       = 0.005;
 
-    // Auto-update cost estimate when system size changes
-    document.getElementById('system_size').addEventListener('change', function() {
-      var costPerWatt = 3.00;
-      var kw = parseInt(this.value);
-      document.getElementById('system_cost').value = Math.round(kw * 1000 * costPerWatt);
-    });
+var PEAK_SUN = { south: 4.8, southwest: 4.5, southeast: 4.4, east_west: 3.8 };
+var SHADING   = { none: 1.00, light: 0.92, moderate: 0.80 };
+
+var UTILITY_HINTS = {
+  georgia_power: 'Solar Buy Back rate: ~7.2¢/kWh export (2026) · 5,000-customer statewide cap',
+  sawnee_emc:    'Sawnee EMC rates vary — contact them directly for current solar buyback terms',
+  other_emc:     'EMC rates vary — check your EMC\'s interconnection agreement for buyback rate'
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('header-cta').href = AFFILIATE_URL;
+
+  document.getElementById('utility').addEventListener('change', function() {
+    document.getElementById('utility-hint').textContent = UTILITY_HINTS[this.value];
   });
-</script>
 
-<!-- Google Analytics stub — replace with your GA4 Measurement ID -->
-<script>
-  function trackEvent(category, action, label) {
-    if (typeof gtag !== 'undefined') {
-      gtag('event', action, { 'event_category': category, 'event_label': label });
-    }
+  document.getElementById('system_size').addEventListener('change', function() {
+    document.getElementById('system_cost').value = Math.round(parseInt(this.value) * 1000 * 3.00);
+  });
+});
+
+function calculateROI() {
+  var kw         = parseFloat(document.getElementById('system_size').value);
+  var cost       = parseFloat(document.getElementById('system_cost').value);
+  var bill       = parseFloat(document.getElementById('monthly_bill').value);
+  var roofDir    = document.getElementById('roof_dir').value;
+  var shade      = document.getElementById('shading').value;
+  var inflation  = parseFloat(document.getElementById('elec_inflation').value);
+  var hasBattery = document.getElementById('battery').checked;
+  var itcOk      = document.getElementById('itc_eligible').checked;
+  var utility    = document.getElementById('utility').value;
+
+  var totalCost  = cost + (hasBattery ? BATTERY_COST : 0);
+  var itcAmt     = itcOk ? totalCost * FEDERAL_ITC : 0;
+  var netCost    = totalCost - itcAmt;
+
+  var annualProd = kw * PEAK_SUN[roofDir] * 365 * SYSTEM_EFF * SHADING[shade];
+  var exportRate = (utility === 'georgia_power') ? GA_EXPORT_RATE : GA_EXPORT_RATE * 1.05;
+
+  var selfSavings  = annualProd * SELF_CONSUME * RETAIL_RATE;
+  var exportCredit = annualProd * (1 - SELF_CONSUME) * exportRate;
+  var yr1Savings   = selfSavings + exportCredit;
+  var offsetPct    = Math.min(100, Math.round((yr1Savings / (bill * 12)) * 100));
+
+  // 25-year model
+  var cumulative = 0;
+  var paybackYr  = null;
+  var projData   = [];
+  var rate       = RETAIL_RATE;
+  var expRate    = exportRate;
+
+  for (var y = 1; y <= 25; y++) {
+    var deg   = Math.pow(1 - DEGRADATION, y - 1);
+    var prod  = annualProd * deg;
+    var yrS   = (prod * SELF_CONSUME * rate) + (prod * (1 - SELF_CONSUME) * expRate);
+    cumulative += yrS;
+    if (!paybackYr && cumulative >= netCost) paybackYr = y;
+    if (y === 1 || y % 5 === 0) projData.push({ yr: y, cum: cumulative });
+    rate    *= (1 + inflation);
+    expRate *= (1 + inflation * 0.5);
   }
+
+  render({
+    paybackYr, net25yr: cumulative - netCost, itcAmt, offsetPct,
+    cost, totalCost, netCost, hasBattery,
+    annualProd, selfSavings, exportCredit, yr1Savings,
+    projData, netCost
+  });
+
+  if (typeof trackEvent === 'function') trackEvent('Calculator', 'calculate', utility + '_' + kw + 'kw');
+}
+
+function render(d) {
+  document.getElementById('placeholder').classList.add('hidden');
+  document.getElementById('results').classList.remove('hidden');
+
+  document.getElementById('r-payback').textContent = d.paybackYr ? d.paybackYr + ' yrs' : '25+ yrs';
+  document.getElementById('r-25yr').textContent    = '$' + Math.round(d.net25yr).toLocaleString();
+  document.getElementById('r-itc').textContent     = d.itcAmt > 0 ? '$' + Math.round(d.itcAmt).toLocaleString() : 'N/A';
+  document.getElementById('r-offset').textContent  = d.offsetPct + '%';
+
+  document.getElementById('br-gross').textContent = '$' + d.cost.toLocaleString();
+  document.getElementById('br-itc').textContent   = d.itcAmt > 0 ? '-$' + Math.round(d.itcAmt).toLocaleString() : '$0';
+  document.getElementById('br-net').textContent   = '$' + Math.round(d.netCost).toLocaleString();
+
+  var battRow = document.getElementById('br-battery-row');
+  battRow.style.display = d.hasBattery ? 'flex' : 'none';
+
+  document.getElementById('br-prod').textContent   = Math.round(d.annualProd).toLocaleString() + ' kWh';
+  document.getElementById('br-self').textContent   = '$' + Math.round(d.selfSavings).toLocaleString();
+  document.getElementById('br-export').textContent = '$' + Math.round(d.exportCredit).toLocaleString();
+  document.getElementById('br-yr1').textContent    = '$' + Math.round(d.yr1Savings).toLocaleString();
+
+  buildBars(d.projData, d.netCost);
+
+  document.getElementById('main-cta').href = AFFILIATE_URL;
+
+  if (window.innerWidth <= 820) {
+    document.getElementById('results-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function buildBars(data, netCost) {
+  var container = document.getElementById('proj-bars');
+  container.innerHTML = '';
+  var maxVal = data[data.length - 1].cum;
+
+  data.forEach(function(p) {
+    var net    = p.cum - netCost;
+    var barPct = Math.min(100, Math.round((p.cum / maxVal) * 100));
+    var cls    = net < 0 ? 'neg' : (net > netCost * 0.5 ? 'good' : 'mid');
+    var label  = (net >= 0 ? '+$' : '-$') + Math.abs(Math.round(net)).toLocaleString();
+
+    var row = document.createElement('div');
+    row.className = 'proj-row';
+    row.innerHTML =
+      '<span class="proj-lbl">Yr ' + p.yr + '</span>' +
+      '<div class="proj-wrap"><div class="proj-fill ' + cls + '" style="width:' + barPct + '%"></div></div>' +
+      '<span class="proj-val">' + label + '</span>';
+    container.appendChild(row);
+  });
+}
+
+function trackEvent(cat, action, label) {
+  if (typeof gtag !== 'undefined') {
+    gtag('event', action, { event_category: cat, event_label: label });
+  }
+}
 </script>
 
 </body>
